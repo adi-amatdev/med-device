@@ -5,13 +5,15 @@ const multer = require('multer')
 const app = express();
 app.use(express.json());
 
+const jsDateToISTEpoch = (date) => new Date(date.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' })).getTime();
+
 // Middleware to handle raw binary file upload
 const upload = multer({
     limits: { fileSize: 1 * 1024 * 1024 }, // 1MB
     storage: multer.diskStorage({
         destination: path.join(__dirname, 'uploads'),
         filename: (req, file, cb) => {
-            cb(null, `${Date.now()}-${file.originalname}`);
+            cb(null, `${jsDateToISTEpoch(new Date())}-${file.originalname}`); //IST epoch used here
         }
     })
 });
@@ -31,7 +33,7 @@ app.post('/upload', (req, res) => {
         fs.mkdirSync(uploadDir);
     }
 
-    const filePath = path.join(uploadDir, `${Date.now()}-uploaded-file`);
+    const filePath = path.join(uploadDir, `${jsDateToISTEpoch(new Date())}-uploaded-file`); //IST epoch used here
     const writeStream = fs.createWriteStream(filePath);
 
     req.on('data', (chunk) => {
